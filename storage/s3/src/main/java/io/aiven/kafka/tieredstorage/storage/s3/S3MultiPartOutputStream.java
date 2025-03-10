@@ -64,8 +64,17 @@ public class S3MultiPartOutputStream extends OutputStream {
     private boolean closed;
     private long processedBytes;
 
+
     public S3MultiPartOutputStream(final String bucketName,
                                    final ObjectKey key,
+                                   final int partSize,
+                                   final S3Client client){
+        this(bucketName, key, S3StorageConfig.S3_STORAGE_CLASS_DEFAULT, partSize, client);
+    }
+
+    public S3MultiPartOutputStream(final String bucketName,
+                                   final ObjectKey key,
+                                   final String storageClass,
                                    final int partSize,
                                    final S3Client client) {
         this.bucketName = bucketName;
@@ -74,7 +83,8 @@ public class S3MultiPartOutputStream extends OutputStream {
         this.partSize = partSize;
         this.partBuffer = ByteBuffer.allocate(partSize);
         final CreateMultipartUploadRequest initialRequest = CreateMultipartUploadRequest.builder().bucket(bucketName)
-            .key(key.value()).build();
+                .storageClass(storageClass)
+                .key(key.value()).build();
         final CreateMultipartUploadResponse initiateResult = client.createMultipartUpload(initialRequest);
         log.debug("Create new multipart upload request: {}", initiateResult.uploadId());
         this.uploadId = initiateResult.uploadId();

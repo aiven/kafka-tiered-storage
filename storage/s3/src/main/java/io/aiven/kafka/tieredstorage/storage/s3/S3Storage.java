@@ -47,6 +47,8 @@ public class S3Storage implements StorageBackend {
     S3Client s3Client;
 
     private String bucketName;
+
+    private String storageClass;
     private int partSize;
 
     @Override
@@ -54,6 +56,7 @@ public class S3Storage implements StorageBackend {
         final S3StorageConfig config = new S3StorageConfig(configs);
         this.s3Client = S3ClientBuilder.build(config);
         this.bucketName = config.bucketName();
+        this.storageClass = config.storageClass();
         this.partSize = config.uploadPartSize();
     }
 
@@ -70,7 +73,7 @@ public class S3Storage implements StorageBackend {
     }
 
     S3MultiPartOutputStream s3OutputStream(final ObjectKey key) {
-        return new S3MultiPartOutputStream(bucketName, key, partSize, s3Client);
+        return new S3MultiPartOutputStream(bucketName, key, storageClass, partSize, s3Client);
     }
 
     @Override

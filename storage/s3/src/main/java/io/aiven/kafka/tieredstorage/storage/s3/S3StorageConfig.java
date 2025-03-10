@@ -37,6 +37,7 @@ import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.model.StorageClass;
 import software.amazon.awssdk.utils.builder.Buildable;
 
 public class S3StorageConfig extends AbstractConfig {
@@ -48,6 +49,11 @@ public class S3StorageConfig extends AbstractConfig {
         + "To be used with custom S3-compatible backends (e.g. minio).";
     public static final String S3_REGION_CONFIG = "s3.region";
     private static final String S3_REGION_DOC = "AWS region where S3 bucket is placed";
+
+    public static final String S3_STORAGE_CLASS_CONFIG = "s3.storage.class";
+    private static final String S3_STORAGE_CLASS_DOC = "S3 storage class to store log segments";
+    static final String S3_STORAGE_CLASS_DEFAULT = StorageClass.STANDARD.toString();
+
     static final String S3_PATH_STYLE_ENABLED_CONFIG = "s3.path.style.access.enabled";
     private static final String S3_PATH_STYLE_ENABLED_DOC = "Whether to use path style access or virtual hosts. "
         + "By default, empty value means S3 library will auto-detect. "
@@ -114,6 +120,13 @@ public class S3StorageConfig extends AbstractConfig {
                 ConfigDef.NO_DEFAULT_VALUE,
                 ConfigDef.Importance.MEDIUM,
                 S3_REGION_DOC)
+            .define(
+                S3_STORAGE_CLASS_CONFIG,
+                ConfigDef.Type.STRING,
+                S3_STORAGE_CLASS_DEFAULT,
+                ConfigDef.ValidString.in(StorageClass.knownValues().stream().map(Object::toString).toArray(String[]::new)),
+                ConfigDef.Importance.MEDIUM,
+                S3_STORAGE_CLASS_DOC)
             .define(
                 S3_PATH_STYLE_ENABLED_CONFIG,
                 ConfigDef.Type.BOOLEAN,
@@ -255,6 +268,10 @@ public class S3StorageConfig extends AbstractConfig {
 
     public String bucketName() {
         return getString(S3_BUCKET_NAME_CONFIG);
+    }
+
+    public String storageClass() {
+        return getString(S3_STORAGE_CLASS_CONFIG);
     }
 
     public Boolean pathStyleAccessEnabled() {
